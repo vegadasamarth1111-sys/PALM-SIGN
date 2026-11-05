@@ -1,0 +1,271 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f2efe7">
+  <title>Palm / Sign — live reading desk</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%2315171a'/%3E%3Cpath d='M8 22V10h4v8h3V7h4v11h3V9h4v13c0 4-3 6-7 6h-4c-4 0-7-2-7-6z' fill='%23e6532f'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <div class="paper-grain" aria-hidden="true"></div>
+
+  <header class="masthead">
+    <a class="brand" href="/" aria-label="Palm Sign home">
+      <span class="brand-mark" aria-hidden="true">
+        <span></span><span></span><span></span>
+      </span>
+      <span class="brand-copy">
+        <span class="brand-name">PALM<span>/</span>SIGN</span>
+        <span class="brand-sub">a live reading desk</span>
+      </span>
+    </a>
+    <div class="mast-divider" aria-hidden="true"></div>
+    <p class="mast-mid">Computer vision<br>semester workbench</p>
+    <div class="mast-tools">
+      <span class="live-pill" id="camera-pill">
+        <span class="dot" aria-hidden="true"></span>
+        <span id="camera-pill-text">CONNECTING</span>
+      </span>
+      <button class="outline-button" id="open-lab" type="button">
+        Open lab
+        <span aria-hidden="true">↗</span>
+      </button>
+    </div>
+  </header>
+
+  <main class="workbench">
+    <section class="stage-column" aria-labelledby="stage-heading">
+      <div class="section-heading">
+        <div class="heading-left">
+          <span class="index">01</span>
+          <h1 id="stage-heading">Live stage</h1>
+        </div>
+        <p>Place <strong>one hand</strong> inside the brackets. Keep it clear of your face.</p>
+      </div>
+
+      <div class="video-frame">
+        <div class="video-strip">
+          <span>CAM 01 / MIRRORED</span>
+          <span id="video-clock">--:--:--</span>
+        </div>
+        <div class="video-wrap">
+          <img id="stream" src="/video_feed" alt="Live camera view with hand tracking">
+          <div class="stream-fallback" id="stream-fallback">
+            <span class="fallback-mark">P/S</span>
+            <strong>Waking the camera</strong>
+            <span>The stage will appear here.</span>
+          </div>
+          <span class="frame-corner tl" aria-hidden="true"></span>
+          <span class="frame-corner tr" aria-hidden="true"></span>
+          <span class="frame-corner bl" aria-hidden="true"></span>
+          <span class="frame-corner br" aria-hidden="true"></span>
+        </div>
+        <div class="video-strip bottom">
+          <span id="frame-index">FRAME 000000</span>
+          <span>CLAHE · HSV · CONTOUR</span>
+        </div>
+      </div>
+
+      <div class="readout-row" aria-label="Live measurements">
+        <div class="readout">
+          <span class="readout-label">Motion</span>
+          <strong class="readout-value" id="motion-direction">STILL</strong>
+          <span class="readout-sub" id="motion-value">0.00 px</span>
+        </div>
+        <div class="readout">
+          <span class="readout-label">Frame rate</span>
+          <strong class="readout-value" id="fps">0.0<span>fps</span></strong>
+          <span class="readout-sub">30 fps target</span>
+        </div>
+        <div class="readout">
+          <span class="readout-label">Hand found</span>
+          <strong class="readout-value" id="hand-found">NO</strong>
+          <span class="readout-sub" id="hand-area">area —</span>
+        </div>
+        <div class="readout">
+          <span class="readout-label">Shape</span>
+          <strong class="readout-value" id="finger-count">—</strong>
+          <span class="readout-sub" id="solidity">solidity —</span>
+        </div>
+      </div>
+    </section>
+
+    <aside class="side-column" aria-label="Reading and transcript">
+      <section class="reading-panel" aria-labelledby="reading-heading">
+        <div class="panel-tag">
+          <span id="reading-heading">02 / Reading</span>
+          <span id="mode-tag">SHAPE</span>
+        </div>
+        <div class="reading-main">
+          <div class="reading-letter" id="reading-label">—</div>
+          <div class="reading-copy">
+            <span class="reading-kicker" id="reading-kicker">WAITING FOR HAND</span>
+            <p id="reading-detail">Show a hand in the scan box.</p>
+          </div>
+        </div>
+        <div class="meter-block">
+          <div class="meter-line">
+            <span>Confidence</span>
+            <strong id="confidence-value">—</strong>
+          </div>
+          <div class="meter"><i id="confidence-bar"></i></div>
+        </div>
+        <div class="meter-block hold-block">
+          <div class="meter-line">
+            <span id="hold-label">Hold to write</span>
+            <span id="hold-time">1.5 s</span>
+          </div>
+          <div class="meter thin"><i id="hold-bar"></i></div>
+        </div>
+        <p class="reading-note" id="reading-note">
+          No classifier yet. The desk is reading hand shape.
+        </p>
+      </section>
+
+      <section class="transcript-panel" aria-labelledby="transcript-heading">
+        <div class="paper-head">
+          <span id="transcript-heading">03 / Transcript</span>
+          <span id="word-count">0 WORDS</span>
+        </div>
+        <div class="transcript-wrap">
+          <p><span id="transcript"></span><span class="caret" aria-hidden="true"></span></p>
+        </div>
+        <div class="paper-foot">
+          <span id="char-count">0 CHARACTERS</span>
+          <div class="small-actions">
+            <button type="button" data-action="space">Space</button>
+            <button type="button" data-action="backspace">Delete</button>
+            <button type="button" data-action="clear">Clear</button>
+          </div>
+        </div>
+      </section>
+
+      <div class="action-row">
+        <button class="solid-button" id="speak" type="button">Speak text</button>
+        <button class="outline-button" id="copy" type="button">Copy</button>
+        <button class="outline-button" id="save-frame" type="button">Save frame</button>
+      </div>
+
+      <section class="model-note" aria-label="Classifier status">
+        <div class="model-line">
+          <span>04 / Classifier</span>
+          <strong id="model-state">SHAPE MODE</strong>
+        </div>
+        <p id="model-copy">No trained model yet. The hand geometry readout keeps working.</p>
+        <button class="text-button" id="open-lab-2" type="button">Open lab <span aria-hidden="true">→</span></button>
+      </section>
+    </aside>
+  </main>
+
+  <footer class="footer">
+    <span>PALM/SIGN <b>v1.0</b></span>
+    <span>OpenCV 4 · 61-D shape vector · SVC</span>
+    <span class="shortcut-note">KEYS <kbd>space</kbd> <kbd>⌫</kbd> <kbd>C</kbd> <kbd>S</kbd></span>
+  </footer>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <dialog class="lab" id="lab" aria-labelledby="lab-title">
+    <div class="lab-shell">
+      <header class="lab-head">
+        <div>
+          <span class="index">WORKBENCH / 00</span>
+          <h2 id="lab-title">The lab</h2>
+        </div>
+        <p>Tune what the camera sees and inspect every stage of the pipeline.<br>Nothing leaves this computer.</p>
+        <button class="lab-close" id="close-lab" type="button" aria-label="Close lab" autofocus>Close <span aria-hidden="true">×</span></button>
+      </header>
+
+      <div class="lab-grid">
+        <section class="lab-section">
+          <span class="lab-number">01</span>
+          <h3>Skin range</h3>
+          <p class="lab-copy">Match the mask to your lighting. If the hand disappears, widen the range; if the wall appears, narrow it.</p>
+          <div class="preset-row" id="presets"></div>
+          <details class="slider-details">
+            <summary>Fine-tune HSV</summary>
+            <div class="slider-grid" id="slider-grid">
+              <label><span>Hue low</span><input id="lower-h" type="range" min="0" max="40" step="1"><output id="lower-h-out"></output></label>
+              <label><span>Hue high</span><input id="upper-h" type="range" min="5" max="60" step="1"><output id="upper-h-out"></output></label>
+              <label><span>Sat. low</span><input id="lower-s" type="range" min="0" max="120" step="1"><output id="lower-s-out"></output></label>
+              <label><span>Sat. high</span><input id="upper-s" type="range" min="80" max="255" step="1"><output id="upper-s-out"></output></label>
+              <label><span>Value low</span><input id="lower-v" type="range" min="0" max="100" step="1"><output id="lower-v-out"></output></label>
+              <label><span>Value high</span><input id="upper-v" type="range" min="100" max="255" step="1"><output id="upper-v-out"></output></label>
+            </div>
+            <button class="outline-button small" id="apply-skin" type="button">Apply range</button>
+          </details>
+        </section>
+
+        <section class="lab-section pipeline-section">
+          <span class="lab-number">02</span>
+          <h3>What the desk sees</h3>
+          <div class="stage-grid">
+            <figure>
+              <img src="/api/stage/source.jpg" alt="Stage source with contour" data-stage="source">
+              <figcaption><span>01</span> Contour</figcaption>
+            </figure>
+            <figure>
+              <img src="/api/stage/light.jpg" alt="CLAHE illumination result" data-stage="light">
+              <figcaption><span>02</span> CLAHE</figcaption>
+            </figure>
+            <figure>
+              <img src="/api/stage/mask.jpg" alt="Clean skin mask" data-stage="mask">
+              <figcaption><span>03</span> Skin mask</figcaption>
+            </figure>
+            <figure>
+              <img src="/api/stage/shape.jpg" alt="Normalised hand shape" data-stage="shape">
+              <figcaption><span>04</span> Warp</figcaption>
+            </figure>
+          </div>
+          <p class="footnote">A fresh still every few frames. Use <b>Save frame</b> on the desk for report-ready screenshots.</p>
+        </section>
+      </div>
+
+      <section class="lab-section lab-wide" aria-labelledby="signs-heading">
+        <span class="lab-number">03</span>
+        <div class="lab-wide-head">
+          <h3 id="signs-heading">Sign library</h3>
+          <p class="sign-summary" id="sign-summary">Loading dataset…</p>
+        </div>
+        <div class="sign-grid" id="sign-grid" role="list" aria-label="Signs and their frame counts"></div>
+        <p class="footnote">Every sign with its frame count and held-out accuracy. Dashed tiles have no frames yet.</p>
+      </section>
+
+      <section class="lab-section lab-wide" aria-labelledby="training-heading">
+        <span class="lab-number">04</span>
+        <h3 id="training-heading">Training</h3>
+        <p class="lab-copy">Show one sign inside the scan box, capture a few seconds of frames, then train. Adding frames to an existing sign improves it.</p>
+        <div class="train-grid">
+          <label class="field" for="collect-label">
+            <span>Sign label</span>
+            <input id="collect-label" type="text" maxlength="3" pattern="[A-Za-z0-9]{1,3}" placeholder="A" autocomplete="off" spellcheck="false" aria-describedby="collect-hint">
+          </label>
+          <label class="field" for="collect-target">
+            <span>Frames</span>
+            <input id="collect-target" type="number" min="20" max="300" step="10" value="80">
+          </label>
+          <button class="solid-button" id="collect-start" type="button">Start capture</button>
+          <button class="outline-button" id="collect-stop" type="button" disabled>Stop</button>
+        </div>
+        <div class="capture-meter" id="capture-meter" hidden>
+          <div class="meter-line">
+            <span id="capture-label">Capturing —</span>
+            <span id="capture-count">0 / 0</span>
+          </div>
+          <div class="meter"><i id="capture-bar"></i></div>
+        </div>
+        <div class="train-actions">
+          <button class="solid-button" id="train-model" type="button">Train model</button>
+          <button class="outline-button" id="reset-lab" type="button">Reset lab</button>
+          <span class="train-status" id="train-status">Loading…</span>
+        </div>
+        <p class="footnote" id="collect-hint">Labels are 1–3 letters or numbers. Keep the hand moving slightly while capturing. <b>Reset</b> deletes every capture and the trained model.</p>
+      </section>
+    </div>
+  </dialog>
+
+  <script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>
